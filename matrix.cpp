@@ -74,7 +74,7 @@ public:
         this->col = col;
         val = output;
     }
-    
+
 };
 
 int main(){
