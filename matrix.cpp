@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
 using namespace std;
+using namespace std::chrono;
 
 //Matrix class
 class matrix {
@@ -130,18 +132,24 @@ namespace matrixOps {
         vector<float> vecA = A.flatten();
         vector<float> vecB = B.T().flatten();
         
-        vector<float> output(A.row*B.col);
+        const int Arow = A.row;
+        const int Acol = A.col;
+        const int Brow = B.row;
+        const int Bcol = B.col;
 
 
-        for (int i = 0; i < A.row; i++){
-            for (int j = 0; j < B.col; j++){
-                for (int k = 0; k < A.col; k++){
-                    output[i*B.col + j] += vecA[i*A.col + k]*vecB[j*B.row + k]; 
+        vector<float> output(Arow*Bcol);
+
+
+        for (int i = 0; i < Arow; i++){
+            for (int j = 0; j < Bcol; j++){
+                for (int k = 0; k < Acol; k++){
+                    output[i*Bcol + j] += vecA[i*Acol + k]*vecB[j*Brow + k]; 
                 }
             }
         }
         
-        matrix mat(A.row, B.col, output);
+        matrix mat(Arow, Bcol, output);
         return mat;
     }
 };
@@ -156,7 +164,11 @@ int main(){
         }
     }
     matrix testT = test.T();
-    matrix multed = matrixOps::matmul_vec(test, testT);
+    auto start = high_resolution_clock::now();
+    matrix multed = matrixOps::matmul_naive_transposed(test, testT);
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(stop - start);
+    cout << duration.count() << endl;
 
     return 0;
 }
