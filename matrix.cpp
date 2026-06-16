@@ -137,7 +137,6 @@ namespace matrixOps {
         const int Brow = B.row;
         const int Bcol = B.col;
 
-
         vector<float> output(Arow*Bcol);
 
 
@@ -165,7 +164,7 @@ int main(){
     }
     matrix testT = test.T();
     auto start = high_resolution_clock::now();
-    matrix multed = matrixOps::matmul_naive_transposed(test, testT);
+    matrix multed = matrixOps::matmul_vec(test, testT);
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
     cout << duration.count() << endl;
