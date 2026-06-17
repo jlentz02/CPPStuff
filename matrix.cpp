@@ -155,7 +155,7 @@ namespace matrixOps {
 
 
 int main(){
-    matrix test(1000,1000);
+    matrix test(100,100);
     int count = 1;
     for (int i = 0; i < test.row; i++){
         for (int j = 0; j < test.col; j++){
@@ -164,7 +164,7 @@ int main(){
     }
     matrix testT = test.T();
     auto start = high_resolution_clock::now();
-    matrix multed = matrixOps::matmul_vec(test, testT);
+    matrix multed = matrixOps::matmul_naive_transposed(test, testT);
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
     cout << duration.count() << endl;
