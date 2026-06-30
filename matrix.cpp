@@ -123,8 +123,8 @@ namespace matrixOps {
         return output;
     }
 
-    //Vectorized matrix multiplication
-    matrix matmul_vec(matrix& A, matrix& B){
+    //Vectorized matrix multiplication with transposed second matrix
+    matrix matmul_vec_transposed(matrix& A, matrix& B){
         if (A.col != B.row){
             throw invalid_argument("Matrix 1 col does not match matrix 2 row");
         }
@@ -151,23 +151,55 @@ namespace matrixOps {
         matrix mat(Arow, Bcol, output);
         return mat;
     }
+
+    //Vectorized matrix multiplication with untransposed second matrix
+    //I suspect this one will be faster than transposing the second matrix
+    //but slower after applying SIMD since the transposed method more naturally
+    //blocks itself
+    matrix matmul_vec(matrix& A, matrix& B){
+        if (A.col != B.row){
+            throw invalid_argument("Matrix 1 col does not match matrix 2 row");
+        }
+
+        vector<float> vecA = A.flatten();
+        vector<float> vecB = B.flatten();
+        
+        const int Arow = A.row;
+        const int Acol = A.col;
+        const int Brow = B.row;
+        const int Bcol = B.col;
+
+        vector<float> output(Arow*Bcol);
+
+        for (int i = 0; i < Arow; i++){
+            for (int k = 0; k < Bcol; k++){
+                for (int j = 0; j < Acol; j++){
+                    output[i*Bcol + j] += vecA[i*Acol + k]*vecB[k*Brow + j];
+                }
+            }
+        }
+        
+        matrix mat(Arow, Bcol, output);
+        return mat;
+    }
+
 };
 
 
 int main(){
-    matrix test(100,100);
+    matrix test(1000,1000);
     int count = 1;
     for (int i = 0; i < test.row; i++){
         for (int j = 0; j < test.col; j++){
             test.val[i][j] = count++;
         }
     }
+
     matrix testT = test.T();
     auto start = high_resolution_clock::now();
-    matrix multed = matrixOps::matmul_naive_transposed(test, testT);
+    matrix multed = matrixOps::matmul_vec_transposed(test, testT);
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(stop - start);
     cout << duration.count() << endl;
-
     return 0;
 }
