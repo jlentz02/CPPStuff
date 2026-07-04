@@ -11,15 +11,15 @@ Once I get some results from different methods, I will test them on trials of 10
 Currently taking a detour to become more familiar with AVX intrisics.
 
 So far I have the following methods:
-Transpose
-Print
-Flatten
-Unflatten
-Reshape
-Naive matrix multiplication (vector of vectors)
-Naive matrix multiplication with transposed second matrix
-Vectorized matrix multiplication
-Vectorized matrix multiplication with transposed second matrix*
+- Transpose
+- Print
+- Flatten
+- Unflatten
+- Reshape
+- Naive Matrix Multiplication (vector of vectors)
+- Naive Matrix Multiplication with transposed second matrix
+- Vectorized Matrix Multiplication
+- Vectorized Matrix Multiplication with transposed second matrix*
 
 *Fastest method so far mostly due to the efficient memory access of the vectors.
 This method is about 75% faster than the naive implementation. 
@@ -31,11 +31,13 @@ working across multiple systems. As such, this folder is just a collection of me
 comfortable with the syntax and work towards matrix by matrix multiplication.
 
 So far I have the following methods implemented with SIMD:
-Vector by vector addition
-Dot product
-Matrix vector product (naive using dot product)
-Matrix Matrix product** (naive using dot product)
+- Vector by Vector Addition
+- Dot Product
+- Matrix Vector Product (naive using dot product)
+- Matrix Matrix Product (naive using dot product)
+- Block Matrix Product
+- Tiled Matrix Matrix Product** (using block matrix product)
 
-**New fastest method. About 500% faster than the previous best method!
+**New fastest method. About 800% faster than the previous best method!
 
 
