@@ -13,3 +13,6 @@ target_link_libraries(MATMULv2 PRIVATE matmul_utils)
 
 add_executable(AVX_exe AVX.cpp)
 target_link_libraries(AVX_exe PRIVATE matmul_utils)
+
+add_executable(testing_writes testing_writes.cpp)
+target_link_libraries(testing_writes PRIVATE matmul_utils)

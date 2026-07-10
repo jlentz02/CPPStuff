@@ -10,35 +10,35 @@
 using namespace std;
 using namespace std::chrono;
 
-namespace vops{
+namespace ops{
     //v2
     //Block Matrix Product
     //Method computes the block matrix product of two 8x8 matrices 
     //To be the cornerstore of the larger matrix product method
-    void block_matmul(float* A_ptr, float* B_ptr, float* C_ptr, size_t N){
+    void block_matmul(float* A_ptr, float* B_ptr, float* C_ptr, size_t strideA, size_t strideB_C){
         //Initialize accumulators
-        __m256 c0 = _mm256_loadu_ps(C_ptr + 0*N);
-        __m256 c1 = _mm256_loadu_ps(C_ptr + 1*N);
-        __m256 c2 = _mm256_loadu_ps(C_ptr + 2*N);
-        __m256 c3 = _mm256_loadu_ps(C_ptr + 3*N);
-        __m256 c4 = _mm256_loadu_ps(C_ptr + 4*N);
-        __m256 c5 = _mm256_loadu_ps(C_ptr + 5*N);
-        __m256 c6 = _mm256_loadu_ps(C_ptr + 6*N);
-        __m256 c7 = _mm256_loadu_ps(C_ptr + 7*N);
+        __m256 c0 = _mm256_loadu_ps(C_ptr + 0*strideB_C);
+        __m256 c1 = _mm256_loadu_ps(C_ptr + 1*strideB_C);
+        __m256 c2 = _mm256_loadu_ps(C_ptr + 2*strideB_C);
+        __m256 c3 = _mm256_loadu_ps(C_ptr + 3*strideB_C);
+        __m256 c4 = _mm256_loadu_ps(C_ptr + 4*strideB_C);
+        __m256 c5 = _mm256_loadu_ps(C_ptr + 5*strideB_C);
+        __m256 c6 = _mm256_loadu_ps(C_ptr + 6*strideB_C);
+        __m256 c7 = _mm256_loadu_ps(C_ptr + 7*strideB_C);
 
         for (size_t k = 0; k < 8; k++){
             //Broadcast column of A_block_ptr
-            __m256 a0 = _mm256_set1_ps(*(A_ptr + 0*N + k));
-            __m256 a1 = _mm256_set1_ps(*(A_ptr + 1*N + k));
-            __m256 a2 = _mm256_set1_ps(*(A_ptr + 2*N + k));
-            __m256 a3 = _mm256_set1_ps(*(A_ptr + 3*N + k));
-            __m256 a4 = _mm256_set1_ps(*(A_ptr + 4*N + k));
-            __m256 a5 = _mm256_set1_ps(*(A_ptr + 5*N + k));
-            __m256 a6 = _mm256_set1_ps(*(A_ptr + 6*N + k));
-            __m256 a7 = _mm256_set1_ps(*(A_ptr + 7*N + k));
+            __m256 a0 = _mm256_set1_ps(*(A_ptr + 0*strideA + k));
+            __m256 a1 = _mm256_set1_ps(*(A_ptr + 1*strideA + k));
+            __m256 a2 = _mm256_set1_ps(*(A_ptr + 2*strideA + k));
+            __m256 a3 = _mm256_set1_ps(*(A_ptr + 3*strideA + k));
+            __m256 a4 = _mm256_set1_ps(*(A_ptr + 4*strideA + k));
+            __m256 a5 = _mm256_set1_ps(*(A_ptr + 5*strideA + k));
+            __m256 a6 = _mm256_set1_ps(*(A_ptr + 6*strideA + k));
+            __m256 a7 = _mm256_set1_ps(*(A_ptr + 7*strideA + k));
 
             //Load in row of B_block
-            __m256 b0 = _mm256_loadu_ps(B_ptr + N*k);
+            __m256 b0 = _mm256_loadu_ps(B_ptr + strideB_C*k);
 
             //FMA step
             c0 = _mm256_fmadd_ps(a0, b0, c0);
@@ -52,14 +52,14 @@ namespace vops{
         }
 
         //Store step
-        _mm256_storeu_ps(C_ptr + 0*N, c0);
-        _mm256_storeu_ps(C_ptr + 1*N, c1);
-        _mm256_storeu_ps(C_ptr + 2*N, c2);
-        _mm256_storeu_ps(C_ptr + 3*N, c3);
-        _mm256_storeu_ps(C_ptr + 4*N, c4);
-        _mm256_storeu_ps(C_ptr + 5*N, c5);
-        _mm256_storeu_ps(C_ptr + 6*N, c6);
-        _mm256_storeu_ps(C_ptr + 7*N, c7);
+        _mm256_storeu_ps(C_ptr + 0*strideB_C, c0);
+        _mm256_storeu_ps(C_ptr + 1*strideB_C, c1);
+        _mm256_storeu_ps(C_ptr + 2*strideB_C, c2);
+        _mm256_storeu_ps(C_ptr + 3*strideB_C, c3);
+        _mm256_storeu_ps(C_ptr + 4*strideB_C, c4);
+        _mm256_storeu_ps(C_ptr + 5*strideB_C, c5);
+        _mm256_storeu_ps(C_ptr + 6*strideB_C, c6);
+        _mm256_storeu_ps(C_ptr + 7*strideB_C, c7);
 
     }
 
@@ -67,10 +67,12 @@ namespace vops{
     //v2
     //Tiled matrix multiplication
     //IJK loop
-    vector<float> matmul_SIMD(vector<float>& A, int rowA, int colA, vector<float>& B, int rowB, int colB){
+    //Will fail on matrices who arent sized correctly
+    vector<float> matmul_SIMD_nopad(vector<float>& A, int rowA, int colA, vector<float>& B, int rowB, int colB){
         if (colA != rowB){
             throw invalid_argument("Matrix A dim 1 does not equal matrix B dim 0");
         }
+    
 
         //Make output vector
         vector<float> C(rowA*colB, 0.0f); 
@@ -88,11 +90,57 @@ namespace vops{
                     float* B_block_ptr = B.data() + j*colB + k;
                     float* C_ptr = C.data() + i*colB + k;
 
-                    block_matmul(A_block_ptr, B_block_ptr, C_ptr, colB);
+                    block_matmul(A_block_ptr, B_block_ptr, C_ptr, colA, colB);
 
                 }
             }
         }
+
+        return C;
+    }
+
+    //v2
+    //Tiled matrix multiplication
+    //IJK loop
+    //Padding inside
+    vector<float> matmul_SIMD(vector<float>& A, int rowA, int colA, vector<float>& B, int rowB, int colB){
+        if (colA != rowB){
+            throw invalid_argument("Matrix A dim 1 does not equal matrix B dim 0");
+        }
+
+        //Pad matrices with zeros so dimensions are multiples of 8
+        vector<int> A_pad = pad(A, rowA, colA);
+        vector<int> B_pad = pad(B, rowB, colB);
+        
+        int rowA_pad = A_pad[0];
+        int colA_pad = A_pad[1];
+        int rowB_pad = B_pad[0];
+        int colB_pad = B_pad[1];
+        //Make output vector
+        vector<float> C((rowA_pad)*(colB_pad), 0.0f); 
+
+        //Temporarily going to assume matrices are the right size
+        for (int i = 0; i < rowA_pad; i+=8){
+            for (int j = 0; j < rowB_pad; j+=8){
+
+                    //Make copy of A_block_ptr to feed into block_matmul
+                    float* A_block_ptr = A.data() + i*colA_pad + j;
+                    
+                for (int k = 0; k < colB_pad; k+=8){
+
+                    //Make a copy of B_block to feed into block_matmul
+                    float* B_block_ptr = B.data() + j*colB_pad + k;
+                    float* C_ptr = C.data() + i*colB_pad + k;
+
+                    block_matmul(A_block_ptr, B_block_ptr, C_ptr, colA_pad, colB_pad);
+
+                }
+            }
+        }
+
+
+        //Unpads C so that result has correct size
+        unpad(C, rowA, colB, colB_pad-colB);
 
         return C;
     }
@@ -103,24 +151,19 @@ namespace vops{
 
 
 int main(){
-    int size = 22;
+    int size = 16;
     vector<float> A(size*size, 0.0f);
     vector<float> B(size*size, 0.0f);
 
     for (int i = 0; i < size*size; i++){
-        A[i] = 1;
+        A[i] = i;
     }
 
     B = A;
 
-    vector<float> A_padded = pad(A, size, size);
-
-    for (int i = 0; i < 24; i++){
-        for (int j = 0; j < 24; j++){
-            cout << A_padded[24*i + j] << " ";
-        }
-        cout << endl;
-    }
+    vector<float> C = ops::matmul_SIMD(A, size, size, B, size, size);
+    print_matrix(C, 16 ,16);
 
     return 0;
+
 }

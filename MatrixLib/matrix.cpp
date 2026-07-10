@@ -187,7 +187,7 @@ namespace matrixOps {
 
 
 int main(){
-    matrix test(16,16);
+    matrix test(17,17);
     int count = 0;
     for (int i = 0; i < test.row; i++){
         for (int j = 0; j < test.col; j++){

@@ -36,8 +36,11 @@ So far I have the following methods implemented with SIMD:
 - Matrix Vector Product (naive using dot product)
 - Matrix Matrix Product (naive using dot product)
 - Block Matrix Product
-- Tiled Matrix Matrix Product** (using block matrix product)
+- Tiled Matrix Matrix Product (using block matrix product) (MATMULv1)
+- MATMUL v2 - modification of above to remove copying and use pointers to handle data load
+- MATMUL v3 - modification of above to use aligned load and arrays internally instead of unaligned vectors
 
-**New fastest method. About 800% faster than the previous best method!
+
+
 
 

@@ -159,7 +159,7 @@ namespace vops{
 
 
 int main(){
-    int size = 256;
+    int size = 1000;
     vector<float> A(size*size, 0.0f);
     vector<float> B(size*size, 0.0f);
 
@@ -170,11 +170,10 @@ int main(){
     B = A;
 
     auto start = high_resolution_clock::now();
-    vector<float> C = vops::matmul_SIMD(A, 64, 1024, B, 1024, 64);
+    vector<float> C = vops::matmul_SIMD(A, size, size, B, size, size);
     auto end = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(end - start);
     cout << duration.count() << endl;
-    cout << C[15] << endl;
 
     return 0;
 }

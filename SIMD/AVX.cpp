@@ -354,48 +354,6 @@ namespace vops{
     }
 
 
-    //v3
-    //Tiled matrix multiplication
-    //IJK loop
-    //Doesn't load B_block and does it inside the tiled matmul instead
-    vector<float> matmul_SIMD_v3(vector<float>& A, int rowA, int colA, vector<float>& B, int rowB, int colB){
-        if (colA != rowB){
-            throw invalid_argument("Matrix A dim 1 does not equal matrix B dim 0");
-        }
-
-        //Make output vector
-        vector<float> C(rowA*colB, 0.0f); 
-
-        //Temporarily going to assume matrices are the right size
-        for (int i = 0; i+7 < rowA; i+=8){
-            for (int j = 0; j + 7 < rowB; j+=8){
-                //Make copy of A_block to feed into block_matmul
-                    float A_block[64] = {0.0f};
-                    for (int ii = 0; ii < 8; ii++){
-                        for (int jj = 0; jj < 8; jj++){
-                            A_block[ii*8 + jj] = A[(ii + i)*colA + jj + j];
-                        }
-                    }
-   
-                for (int k = 0; k + 7 < colB; k+=8){
-
-                    //Make a copy of B_block to feed into block_matmul
-                    float B_block[64] = {0.0f};
-                    for (int jj = 0; jj < 8; jj++){
-                        for (int kk = 0; kk < 8; kk++){
-                            B_block[jj*8 + kk] = B[(jj + j)*colB + kk + k];
-                        }
-                    }
-                    float* C_ptr = C.data() + i*colB + k;
-                    block_matmul(A_block, B_block, C_ptr, colB);
-
-                }
-            }
-        }
-
-        return C;
-    }
-
 }
 
 
