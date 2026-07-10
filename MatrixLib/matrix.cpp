@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include "matmul_utils.h"
 using namespace std;
 using namespace std::chrono;
 
@@ -185,21 +186,36 @@ namespace matrixOps {
 
 };
 
+//Takes in one of the above matmul functions and runs and records a complete set of experiments
+template <typename Func>
+void run_experiment(Func f, string algo_name){
+    cout << "Running experiment using " << algo_name << endl;
+    vector<int> sizes = {16,32,64,128,256,384,512,640,768,896,1024,1280,1536,1792,2048};
+    vector<int> times;
+    for (int size : sizes){
+        matrix test(size, size);
 
-int main(){
-    matrix test(17,17);
-    int count = 0;
-    for (int i = 0; i < test.row; i++){
-        for (int j = 0; j < test.col; j++){
-            test.val[i][j] = count++;
-        }
+        auto start = high_resolution_clock::now();
+        matrix C = f(test, test);
+        auto end = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(end - start);
+
+        times.push_back(duration.count());
+
     }
 
-    
-    matrix multed = matrixOps::matmul_vec_transposed(test, test);
-    
-    multed.print();
+    for (int time : times){
+        cout << time << " ";
+    }
 
+    record_experiment(algo_name, times);
+
+}
+
+
+int main(){
+    
+    run_experiment(matrixOps::matmul_vec_transposed, "matmul_vec_transposed");
 
     return 0;
 }

@@ -150,20 +150,41 @@ namespace ops{
 
 
 
-int main(){
-    int size = 16;
-    vector<float> A(size*size, 0.0f);
-    vector<float> B(size*size, 0.0f);
+//Takes in one of the above matmul functions and runs and records a complete set of experiments
+template <typename Func>
+void run_experiment(Func f, string algo_name){
+    cout << "Running experiment using " << algo_name << endl;
+    vector<int> sizes = {16,32,64,128,256,384,512,640,768,896,1024,1280,1536,1792,2048};
+    vector<int> times;
+    for (int size : sizes){
+        vector<float> A(size*size, 0.0f);
 
-    for (int i = 0; i < size*size; i++){
-        A[i] = i;
+        for (int i = 0; i < size*size; i++){
+            A[i] = i;
+        }
+
+        vector<float> B = A;
+
+        auto start = high_resolution_clock::now();
+        vector<float> C = f(A, size, size, B, size, size);
+        auto end = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(end - start);
+
+        times.push_back(duration.count());
+
     }
 
-    B = A;
+    for (int time : times){
+        cout << time << " ";
+    }
 
-    vector<float> C = ops::matmul_SIMD(A, size, size, B, size, size);
-    print_matrix(C, 16 ,16);
+
+}
+
+
+int main(){
+    
+    run_experiment(ops::matmul_SIMD, "matmul_SIMD");
 
     return 0;
-
 }
