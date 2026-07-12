@@ -13,7 +13,44 @@ measure of how performant the algorithm is. I do acknowledge that there are bett
 looking at cache misses, but this method is straight forward and easy to extract using the std::chrono library.
 
 - Naive matrix multiplication
-    This 
+    - This is the most basic, and straightforward, implementation of matrix multiplication that I wrote. Prior to writing
+      this method, I became familiar with loops, vectors, classes, and the basic syntax of C++. For this method in particular,
+      I treated a matrix as a class object whos main data was stored in a vector of vectors. This is bad for a number of reasons
+      but it is naive matrix multiplication for a reason. Anyway, this method clocked in at ~0.5 GFLOPs on a 2048x2048 matrix multiplication.
+      All references to GFLOPs going forward correspond to a 2048x2048 matrix multiplication.
+- Naive matrix multiplication transposed
+    - If we transpose the second matrix we can do operations row by row instead of row by column drastically reducing the number of
+      memory switches. Unfortunately, this had no effect (possibly due to poor compiler optimizations but we will revisit that at the end).
+      This implementation performed marginally worse than the prior implementation, also around ~0.5 GFLOPs.
+- Vectorized matrix multiplication
+    - Flattening your matrix makes it so that all of the data is stored sequentially in memory. This offered a huge improvement getting us
+      to ~0.8 GFLOPs.
+- Vectorized matrix multiplication transposed
+    - Same idea as the previous transposed function, same result with little change. ~0.8 GFLOPs.
+- SIMD dot product matrix multiplication
+    - Now we are getting to the good stuff. Matrix multiplication is a easily parallelizable operation (thats why GPUs are so good at it).
+      However, up until this point we have been executing every single addition and multiplication one at a time, all ~8 billion of them.
+      We can do much better by leveraging our CPU to compute math on 32 byte blocks of data (8 floats) at the same time using AVX SIMD
+      instructions. These just tell the CPU to execute the same operation in parallel on 8 floats at a time. This basic implementation
+      computes each dot product between a row of matrix A and a column of matrix B to produce the resultant entry of matrix C.
+      Even this naive approach leveraging AVX intrinsics yielded ~4 GFLOPs.
+- SIMD tiled version 1
+    - This is the bread and butter of high performance matrix multiplication. If your CPU can leverage SIMD to compute very quickly
+      on 8 float wide pieces of information, then we should design the entire algorithm around this. Math students will be familiar
+      with block matrix multiplication, and that is essentially the principle we are using here except it is called tiling. My method
+      would iterate through the matrix using three nested loops with a stride of 8, and then compute the relevant 8x8 block matrix
+      multiplications. However, as I originally wrote my block matrix multiplication code, the inputs had to be 8x8 block matrices themselves.
+      So, I wound up with this very wasteful copying step that really ate into performance in hindsight. This method reached ~5.7 GFLOPs.
+    - It was around this point in the process that the project had grown sufficiently that I wanted to write some shared method between
+      files. This is where the utilites library I wrote came into play, and when I first started using CMake to handle compiling the
+      separate files in the library. CMake sucked at first, but I think it is fairly intuitive once you get it going and it made handling
+      shared methods much easier. In particular, I needed a method to pad odd sized matrices with zeros so their dimensions were
+      multiples of 8.
+- SIMD tiled version 2
+    - This is, at current, my best implementation of matrix multiplication. It discards the copying step entirely and handles all of the
+      data loading using pointers. I would say this is the point in my learning C++ where pointers started to really make sense, and where
+      I really started to appreciate just how useful they were. This method clocked in at ~11 GFLOPs.
+    - 
 
 
 
