@@ -1,5 +1,5 @@
 # CPPStuff
-Learning Summary
+## Learning Summary
 This project began as a way for me to learn C++. As a math student, I have long been familiar with python and implemented
 some fairly robust projects using Pytorch to handle large unsupervised learning problems (see my repo WDL). 
 However, one annoyance I am sure every researcher can sympathize with is experiments and simulations taking a long time to run.
@@ -90,7 +90,7 @@ So far I have the following methods:
 *Fastest method so far mostly due to the efficient memory access of the vectors.
 This method is about 75% faster than the naive implementation. 
 
-## SIMD Stuff
+## SIMD
 As mentioned above to progress in multipliying matrices faster, the next thing I am looking at is SIMD.
 In particular, I am writing code for the AVX operation set, but may also write for NEON later since I am
 working across multiple systems. As such, this folder is just a collection of methods as I become 
