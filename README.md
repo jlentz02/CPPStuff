@@ -50,8 +50,20 @@ looking at cache misses, but this method is straight forward and easy to extract
     - This is, at current, my best implementation of matrix multiplication. It discards the copying step entirely and handles all of the
       data loading using pointers. I would say this is the point in my learning C++ where pointers started to really make sense, and where
       I really started to appreciate just how useful they were. This method clocked in at ~11 GFLOPs.
-    - 
+    - Running concurrently to all of the technical skills I acquired during this project, I also learned, painfully,
+      about the C++ compiler. In hindsight, I should have sought out a complete explanation of how to get the most out of your compiler
+      much sooner than I did. The first frustration was discovering that, across the two machines I was working, one was using C++11 and
+      the other C++14. I am certain it wasn't a problem as the time, but I was bothered that not only were they not the same, but they
+      were out of date. I adjusted my compiler flags to use C++23. Later, I learned that AVX intrisics, again, require a compiler flag.
+      The third challenge was referenced earlier when I decided to add my own library and needed to replace my
+      tasks.json file with CMake. The final, and most embarassing realization was the compiler flag -O3. Adding this single compiler flag turned my 11 GFLOP method into a 85 GFLOP method! I was simultaneously thrilled and dismayed by this realization. My code was so much faster, but all my benchmarks were
+      wrong and, in some way, it felt like I had been doing the whole project incorrectly. Upon using godbolt to investigate the
+      compiled assembly of the above method, I found that the -O0 code was considerably longer and less interpretable than the -O3 code. Indeed, the -O3
+      compiled assembly much more closely resembled the code I had written using AVX intrisics. It was very rewarding to see the
+      instructions I had proscribed appear in the assembly. Regardless, here are the lessons I learned: C++ does exactly what you tell it to,
+      not what you would assume or expect it to. Secondly, you are working with your compiler, it does not work for you. Below        is a table of the -O0 versus -O3 GFLOPs on the 2048x2048 matrix multiplications.
 
+Add table here
 
 
 
@@ -92,6 +104,13 @@ So far I have the following methods implemented with SIMD:
 - Block Matrix Product
 - MATMUL v1 - straight forward implementation of tiled matrix multiplication using 
 - MATMUL v2 - modification of above to remove copying and use pointers to handle data loading
+
+## Utilities
+This folder contains a library with some methods that are used across the matrix, AVX, MATMULv1 and MATMULv2 files. 
+- pad
+- unpad
+- print_matrix
+- record_experiment (saves the results of a series of runs to experiments.csv)
 
 
 
