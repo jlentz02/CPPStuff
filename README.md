@@ -63,8 +63,19 @@ looking at cache misses, but this method is straight forward and easy to extract
       instructions I had proscribed appear in the assembly. Regardless, here are the lessons I learned: C++ does exactly what you tell it to,
       not what you would assume or expect it to. Secondly, you are working with your compiler, it does not work for you. Below        is a table of the -O0 versus -O3 GFLOPs on the 2048x2048 matrix multiplications.
 
-Add table here
+Comparison of -O0 versus -O3 compilation measured in GFLOPs
 
+|Algorithm name | -O0 | -O3 | %change|
+|---------------|-----|-----|--------|
+|Naive          |  0.5|  46 |   9200%|
+|Naive^T        |  0.5|  4.1|    820%|
+|Vector         |  0.8|  62 |   7750%|
+|Vector^T       |  0.8|  6.1|    763%|
+|SIMD dot       |  4  |  28 |    700%|
+|Tiled v1       |  5.7|   52|    912%|
+|Tiled v2       |  11 |   83|    755%|
+
+As we can see, having the right compiler flags is extremely important, but it is still worth taking the time to write high performance code if you want to squeeze every drop out of your system.
 
 
 
