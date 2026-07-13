@@ -81,7 +81,7 @@ void print_matrix(vector<float>& matrix, int row, int col){
 }
 
 void record_experiment(string algo_name, vector<int> times){
-    const char *path = "C:/Users/joshu/Documents/Coding Projects/CPPStuff/experiments.csv";
+    const char *path = "C:/Users/joshu/Documents/Coding Projects/CPPStuff/experiments-O3.csv";
     ofstream myfile(path, ios::app);
 
     if (!myfile){

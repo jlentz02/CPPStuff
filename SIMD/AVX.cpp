@@ -393,7 +393,7 @@ void run_experiment(Func f, string algo_name){
 
 int main(){
     
-    run_experiment(vops::matmul_SIMD, "matmul_SIMD");
+    run_experiment(vops::matmul_SIMD_naive, "matmul_SIMD_naive");
 
     return 0;
 }

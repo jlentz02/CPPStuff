@@ -178,13 +178,13 @@ void run_experiment(Func f, string algo_name){
         cout << time << " ";
     }
 
-
+    record_experiment(algo_name, times);
 }
 
 
 int main(){
     
-    run_experiment(ops::matmul_SIMD, "matmul_SIMD");
+    run_experiment(ops::matmul_SIMD, "matmul_SIMD_tiled_v2");
 
     return 0;
 }
